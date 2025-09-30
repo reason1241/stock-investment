@@ -2,7 +2,7 @@ import os
 import shutil
 import requests
 
-from datetime import date
+from datetime import datetime, timedelta, timezone
 
 def main():
     screens = {
@@ -10,7 +10,8 @@ def main():
         "new_high_52w": "https://personality.mschoi.com/stock/new_high_52w"
     }
     
-    dt = date.today()
+    kst = timezone(timedelta(hours=9))
+    dt = datetime.now(kst)
     dt_str = f"{dt.year}{dt.month:02d}{dt.day:02d}"
     path = dt_str
     
