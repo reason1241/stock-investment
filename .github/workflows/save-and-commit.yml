@@ -1,0 +1,59 @@
+name: Save data daily (KST 07:00)
+
+on:
+  schedule:
+    # GitHub Actions의 cron은 UTC 기준입니다.
+    # KST(UTC+9) 오전 07:00 = UTC 전날 22:00
+    - cron: "0 22 * * *"
+  # 수동 실행도 가능하게
+  workflow_dispatch:
+
+permissions:
+  contents: write   # main에 푸시하려면 write 권한 필요
+
+concurrency: save-data-daily
+
+jobs:
+  run-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 푸시하려면 히스토리 필요
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (if any)
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+      - name: Run save_data.py
+        run: |
+          python save_data.py
+
+      - name: Commit & push if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # 변경 사항 스테이징
+          git add -A
+
+          # 변경 없으면 종료
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "chore(data): update by save_data.py ($(date -u +'%Y-%m-%dT%H:%M:%SZ'))"
+          # 현재 워크플로우가 체크아웃한 HEAD를 main으로 푸시
+          git push origin HEAD:main
