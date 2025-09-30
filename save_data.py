@@ -1,6 +1,7 @@
 import os
 import shutil
 import requests
+import pandas as pd
 
 from datetime import datetime, timedelta, timezone
 
@@ -24,9 +25,10 @@ def main():
     os.mkdir(path)
     
     for k, url in screens.items():
-        data = requests.get(url)
-        with open(f"{path}/{k}.json", "w") as f:
-            f.write(data.text)
+        response = requests.get(url)
+        data = response.json().get('data', [])
+        df = pd.DataFrame(data)
+        df.to_csv(f"{path}/{k}.csv")
     
 if __name__ == '__main__':
     main()
