@@ -7,7 +7,8 @@ from datetime import datetime, timedelta, timezone
 def main():
     screens = {
         "below_200sma_monthly_perf": "https://personality.mschoi.com/stock/below_200sma_monthly_perf",
-        "new_high_52w": "https://personality.mschoi.com/stock/new_high_52w"
+        "mid_cap_new_high_52w": "https://personality.mschoi.com/stock/mid_cap_new_high_52w",
+        "small_cap_new_high_52w": "https://personality.mschoi.com/stock/small_cap_new_high_52w"
     }
     
     kst = timezone(timedelta(hours=9))
