@@ -41,10 +41,7 @@ def postprocess(d):
 
 statistics = [mean_pos, mean_neg, count_pos, count_neg]
 
-if __name__ == '__main__':
-    with open('./20251002/below_200sma_monthly_perf.json') as f:
-        data = json.loads(f.read())
-        
+def summarize_stock_data(data):
     summary = {}
     summary['status'] = data['status']
     summary['message'] = data['message']
@@ -85,7 +82,14 @@ if __name__ == '__main__':
         summary['summary']['n_total'] = len(stock_data)
         summary['summary']['n_change_pct_pos'] = len(stock_data[stock_data['change_pct'] >= 0])
         summary['summary']['n_change_pct_neg'] = len(stock_data[stock_data['change_pct'] < 0])
+
+    return postprocess(summary)
+
+if __name__ == '__main__':
+    with open('./20251002/below_200sma_monthly_perf.json') as f:
+        data = json.loads(f.read())
         
+        summary = summarize_stock_data(data)
         
         with open('./20251002/below_200sma_monthly_perf_summary.json', 'w') as f:
             f.write(json.dumps(postprocess(summary)))
