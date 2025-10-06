@@ -22,7 +22,7 @@ def count_neg(x):
     return get_neg(x).count()
 
 def str_pct_to_float_pct(x):
-    return x.str.replace("%","").astype(float)
+    return x.str.replace("%","").replace("-",None).astype(float)
     
 def parse_groupby_to_dict(x):
     x.columns = ['_'.join(col).strip() for col in x.columns.values]

@@ -57,8 +57,8 @@ def main():
     except Exception as e:
         logger.error(e)
         if data:
-            logger.error(data.text)       
-    
+            logger.error(data.text)
+        raise e
     
 if __name__ == '__main__':
     main()
