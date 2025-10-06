@@ -1,3 +1,4 @@
+import copy
 import json
 import math
 import pandas as pd
@@ -42,9 +43,8 @@ def postprocess(d):
 statistics = [mean_pos, mean_neg, count_pos, count_neg]
 
 def summarize_stock_data(data):
-    summary = {}
-    summary['status'] = data['status']
-    summary['message'] = data['message']
+    status = data['status']
+    message = data['message']
         
     if data['status'] == 'success':
         stock_data = pd.DataFrame(data['data'])
@@ -63,27 +63,60 @@ def summarize_stock_data(data):
         stock_data['perf_month_pct'] = str_pct_to_float_pct(stock_data['perf_month'])
         
         # extract sector, industry
-        summary['aggregates'] = {}
-        summary['aggregates']['by_sector'] = parse_groupby_to_dict(stock_data.groupby('sector').agg({'change_pct': ['min', 'max', *statistics]}))
-        summary['aggregates']['by_industry'] = parse_groupby_to_dict(stock_data.groupby('industry').agg({'change_pct': ['min', 'max', *statistics]}))        
+        sector_summary = {
+            "status": status,
+            "message": message,
+            "aggregates": {
+                "by_sector": parse_groupby_to_dict(stock_data.groupby('sector').agg({'change_pct': ['min', 'max', *statistics]}))
+            } 
+        }
+        
+        industry_summary = {
+            "status": status,
+            "message": message,
+            "aggregates": {
+                "by_industry": parse_groupby_to_dict(stock_data.groupby('industry').agg({'change_pct': ['min', 'max', *statistics]}))
+            } 
+        }
         
         # extract min max change pct
         columns = ['ticker', 'company', 'sector', 'industry', 'market_cap', 'change_pct', 'perf_week_pct', 'perf_month_pct']
         
         # extract weekly and monthly mean
-        summary['change_pct'] = {}
-        summary['change_pct']['best3'] = stock_data.nlargest(3, 'change_pct')[columns].to_dict(orient="records")
-        summary['change_pct']['worst3'] = stock_data.nsmallest(3, 'change_pct')[columns].to_dict(orient="records")
+        best3_summary = {
+            "status": status,
+            "message": message,
+            "change_pct": {
+                "best3": stock_data.nlargest(3, 'change_pct')[columns].to_dict(orient="records")
+            } 
+        }
+        
+        worst3_summary = {
+            "status": status,
+            "message": message,
+            "change_pct": {
+                "worst3": stock_data.nsmallest(3, 'change_pct')[columns].to_dict(orient="records")
+            } 
+        }
 
         # extract summary
-        summary['summary'] = {}
-        summary['summary']['perf_week_pct_mean'] = stock_data['perf_week_pct'].mean()
-        summary['summary']['perf_month_pct_mean'] = stock_data['perf_month_pct'].mean()
-        summary['summary']['n_total'] = len(stock_data)
-        summary['summary']['n_change_pct_pos'] = len(stock_data[stock_data['change_pct'] >= 0])
-        summary['summary']['n_change_pct_neg'] = len(stock_data[stock_data['change_pct'] < 0])
+        total_summary = {
+            "status": status,
+            "message": message,
+            "summary": {
+                "perf_week_pct_mean": stock_data['perf_week_pct'].mean(),
+                "perf_month_pct_mean": stock_data['perf_month_pct'].mean(),
+                "n_total": len(stock_data),
+                "n_change_pct_pos": len(stock_data[stock_data['change_pct'] >= 0]),
+                "n_change_pct_neg": len(stock_data[stock_data['change_pct'] < 0])
+            }
+        }
 
-    return postprocess(summary)
+    return (postprocess(sector_summary), 
+            postprocess(industry_summary), 
+            postprocess(best3_summary), 
+            postprocess(worst3_summary), 
+            postprocess(total_summary))
 
 if __name__ == '__main__':
     with open('./20251002/below_200sma_monthly_perf.json') as f:

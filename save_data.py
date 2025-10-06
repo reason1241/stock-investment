@@ -31,9 +31,22 @@ def main():
         with open(f"{path}/{k}.json", "w") as f:
             f.write(data.text)
     
-        with open(f"{path}/{k}_summary.json", "w") as f:
-            summary = summarize_stock_data(json.loads(data.text))
-            f.write(json.dumps(summary))
+        (sector, industry, best3, worst3, total) = summarize_stock_data(json.loads(data.text))
+    
+        with open(f"{path}/{k}_sector_summary.json", "w") as f:           
+            f.write(json.dumps(sector))
+            
+        with open(f"{path}/{k}_industry_summary.json", "w") as f:           
+            f.write(json.dumps(industry))
+            
+        with open(f"{path}/{k}_best3_summary.json", "w") as f:           
+            f.write(json.dumps(best3))
+            
+        with open(f"{path}/{k}_worst3_summary.json", "w") as f:           
+            f.write(json.dumps(worst3))
+            
+        with open(f"{path}/{k}_total_summary.json", "w") as f:           
+            f.write(json.dumps(total))
         
     
     
