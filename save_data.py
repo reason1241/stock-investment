@@ -1,10 +1,14 @@
 import os
 import json
 import shutil
+import logging
 import requests
 
 from datetime import datetime, timedelta, timezone
 from summarize_data import summarize_stock_data
+
+logger = logging.getLogger()
+
 
 def main():
     screens = {
@@ -26,28 +30,34 @@ def main():
             
     os.mkdir(path)
     
-    for k, url in screens.items():
-        data = requests.get(url)
-        with open(f"{path}/{k}.json", "w") as f:
-            f.write(data.text)
+    data = None
     
-        (sector, industry, best3, worst3, total) = summarize_stock_data(json.loads(data.text))
-    
-        with open(f"{path}/{k}_sector_summary.json", "w") as f:           
-            f.write(json.dumps(sector))
-            
-        with open(f"{path}/{k}_industry_summary.json", "w") as f:           
-            f.write(json.dumps(industry))
-            
-        with open(f"{path}/{k}_best3_summary.json", "w") as f:           
-            f.write(json.dumps(best3))
-            
-        with open(f"{path}/{k}_worst3_summary.json", "w") as f:           
-            f.write(json.dumps(worst3))
-            
-        with open(f"{path}/{k}_total_summary.json", "w") as f:           
-            f.write(json.dumps(total))
+    try:
+        for k, url in screens.items():
+            data = requests.get(url)
+            with open(f"{path}/{k}.json", "w") as f:
+                f.write(data.text)
         
+            (sector, industry, best3, worst3, total) = summarize_stock_data(json.loads(data.text))
+        
+            with open(f"{path}/{k}_sector_summary.json", "w") as f:           
+                f.write(json.dumps(sector))
+                
+            with open(f"{path}/{k}_industry_summary.json", "w") as f:           
+                f.write(json.dumps(industry))
+                
+            with open(f"{path}/{k}_best3_summary.json", "w") as f:           
+                f.write(json.dumps(best3))
+                
+            with open(f"{path}/{k}_worst3_summary.json", "w") as f:           
+                f.write(json.dumps(worst3))
+                
+            with open(f"{path}/{k}_total_summary.json", "w") as f:           
+                f.write(json.dumps(total))
+    except Exception as e:
+        logger.error(e)
+        if data:
+            logger.error(data.text)       
     
     
 if __name__ == '__main__':
