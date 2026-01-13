@@ -1,10 +1,10 @@
 name: Save data daily (KST 07:00)
 
 on:
-  schedule:
-    # GitHub Actions의 cron은 UTC 기준입니다.
-    # KST(UTC+9) 오전 07:00 = UTC 전날 22:00
-    - cron: "33 22 * * *"
+  # schedule:
+  #   # GitHub Actions의 cron은 UTC 기준입니다.
+  #   # KST(UTC+9) 오전 07:00 = UTC 전날 22:00
+  #   - cron: "33 22 * * *"
   # 수동 실행도 가능하게
   workflow_dispatch:
 
